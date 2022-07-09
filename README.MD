@@ -13,3 +13,9 @@ To start project run
 ```sh
 npm run start
 ```
+
+To lint and fix codestyle
+
+```sh
+npm run lint
+```
