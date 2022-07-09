@@ -1,13 +1,13 @@
 export class Canvas {
-  private readonly el: HTMLCanvasElement
+  private readonly elem: HTMLCanvasElement
 
   private readonly ctx: CanvasRenderingContext2D
 
   constructor () {
     this.init()
 
-    this.el = <HTMLCanvasElement>document.getElementById('canvas')!
-    this.ctx = this.el.getContext('2d')!
+    this.elem = <HTMLCanvasElement>document.getElementById('canvas')!
+    this.ctx = this.elem.getContext('2d')!
   }
 
   private addCanvas () {
@@ -41,7 +41,7 @@ export class Canvas {
   }
 
   public get element () {
-    return this.el
+    return this.elem
   }
 
   public get context () {
