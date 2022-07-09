@@ -1,5 +1,5 @@
-import { BaseStyles } from './BaseStyles'
-import { Canvas } from './Canvas'
+import { BaseStyles } from './modules/BaseStyles'
+import { Canvas } from './modules/Canvas'
 
 BaseStyles.apply()
 
