@@ -19,3 +19,9 @@ To lint and fix codestyle
 ```sh
 npm run lint
 ```
+
+To test
+
+```sh
+npm run test
+```
