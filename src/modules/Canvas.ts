@@ -8,7 +8,7 @@ export class Canvas {
 
     this.elem = <HTMLCanvasElement>document.getElementById('canvas')!
     this.ctx = this.elem.getContext('2d')!
-    this.animationId = null;
+    this.animationId = null
   }
 
   private addCanvas () {
@@ -41,18 +41,18 @@ export class Canvas {
     this.addResizeHandler()
   }
 
-  public startAnimation(callback: () => void) {
-    this.animationId = requestAnimationFrame(() => this.startAnimation(callback));
-    callback();
+  public startAnimation (callback: () => void) {
+    this.animationId = requestAnimationFrame(() => this.startAnimation(callback))
+    callback()
   }
 
-  public stopAnimation() {
+  public stopAnimation () {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId)
     }
   }
 
-  public clear() {
+  public clear () {
     this.context.clearRect(0, 0, this.element.width, this.element.height)
   }
 
