@@ -1,13 +1,13 @@
 export class Canvas {
-  private readonly elem: HTMLCanvasElement
-  private readonly ctx: CanvasRenderingContext2D
+  readonly element: HTMLCanvasElement
+  readonly context: CanvasRenderingContext2D
   private animationId: number | null
 
   constructor () {
     this.init()
 
-    this.elem = <HTMLCanvasElement>document.getElementById('canvas')!
-    this.ctx = this.elem.getContext('2d')!
+    this.element = <HTMLCanvasElement>document.getElementById('canvas')!
+    this.context = this.element.getContext('2d')!
     this.animationId = null
   }
 
@@ -54,13 +54,5 @@ export class Canvas {
 
   public clear () {
     this.context.clearRect(0, 0, this.element.width, this.element.height)
-  }
-
-  public get element () {
-    return this.elem
-  }
-
-  public get context () {
-    return this.ctx
   }
 }

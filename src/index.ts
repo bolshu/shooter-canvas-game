@@ -1,3 +1,4 @@
+import gsap from 'gsap'
 import { BaseStyles } from './modules/BaseStyles'
 import { Canvas } from './modules/Canvas'
 
@@ -8,10 +9,18 @@ const canvas = new Canvas()
 const xCenter = canvas.element.width / 2
 const yCenter = canvas.element.height / 2
 
+class Colors {
+  static white = 'white'
+
+  static getEnemyColor () {
+
+  }
+}
+
 class Circle {
   x: number
   y: number
-  readonly r: number
+  r: number
   private readonly color: string
 
   constructor (x: number, y: number, r: number, color: string) {
@@ -33,7 +42,7 @@ class Circle {
 
 class Player extends Circle {
   constructor () {
-    super(xCenter, yCenter, 50, 'tomato')
+    super(xCenter, yCenter, 20, Colors.white)
   }
 }
 
@@ -58,13 +67,13 @@ class CircleWithVelocity extends Circle {
 
 class Projectile extends CircleWithVelocity {
   constructor (velocity: Velocity) {
-    super(xCenter, yCenter, 10, 'aqua', velocity)
+    super(xCenter, yCenter, 3, Colors.white, velocity)
   }
 }
 
 class Enemy extends CircleWithVelocity {
   constructor (x: number, y: number, r: number, velocity: Velocity) {
-    super(x, y, r, 'red', velocity)
+    super(x, y, r, `hsl(${Math.random() * 200}, 50%, 50%)`, velocity)
   }
 }
 
@@ -72,8 +81,8 @@ const enemies: Enemy[] = []
 
 const spawnEnemies = () => {
   setInterval(() => {
-    const rMin = 10
-    const r = Math.random() * (50 - rMin) + rMin
+    const rMin = 20
+    const r = Math.random() * (60 - rMin) + rMin
     let x
     let y
 
@@ -101,21 +110,33 @@ const player = new Player()
 const projectiles: Projectile[] = []
 
 canvas.element.addEventListener('click', (e: MouseEvent) => {
+  const MULTIPLIER = 6
   const angle = Math.atan2(
     e.clientY - canvas.element.height / 2,
     e.clientX - canvas.element.width / 2
   )
 
-  projectiles.push(new Projectile({ x: Math.cos(angle), y: Math.sin(angle) }))
+  projectiles.push(new Projectile({
+    x: Math.cos(angle) * MULTIPLIER,
+    y: Math.sin(angle) * MULTIPLIER
+  }))
 })
 
 const tick = () => {
-  canvas.clear()
+  canvas.context.fillStyle = 'rgba(0, 0, 0, 0.1)'
+  canvas.context.fillRect(0, 0, canvas.element.width, canvas.element.height)
 
   player.draw(canvas.context)
 
-  projectiles.forEach((projectile) => {
+  projectiles.forEach((projectile, index) => {
     projectile.update(canvas.context)
+
+    setTimeout(() => {
+      if (projectile.x + projectile.r < 0 || projectile.x - projectile.r > canvas.element.width ||
+            projectile.y + projectile.r < 0 || projectile.y - projectile.r > canvas.element.height) {
+        projectiles.splice(index, 1)
+      }
+    })
   })
 
   enemies.forEach((enemy, enemyIndex) => {
@@ -134,7 +155,15 @@ const tick = () => {
 
       setTimeout(() => {
         if (dist - enemy.r - projectile.r < 1) {
-          enemies.splice(enemyIndex, 1)
+          const minEnemyR = 20;
+
+          if (enemy.r - minEnemyR > minEnemyR) {
+            gsap.to(enemy, {
+              r: enemy.r - 10
+            })
+          } else {
+            enemies.splice(enemyIndex, 1)
+          }
           projectiles.splice(projectileIndex, 1)
         }
       })
