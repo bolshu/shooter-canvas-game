@@ -1,6 +1,4 @@
-# Shooter
-
-Canvas game
+# Shooter Canvas Game
 
 ## How to start
 
