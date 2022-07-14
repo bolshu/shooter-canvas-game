@@ -78,8 +78,8 @@ class Enemy extends CircleWithVelocity {
 }
 
 class Particle extends CircleWithVelocity {
-  alpha: number;
-  fritcion: number;
+  alpha: number
+  fritcion: number
 
   constructor (x: number, y: number, r: number, color: string, velocity: Velocity) {
     super(x, y, r, color, velocity)
@@ -88,11 +88,11 @@ class Particle extends CircleWithVelocity {
     this.fritcion = 0.99
   }
 
-  update(ctx: CanvasRenderingContext2D): void {
+  update (ctx: CanvasRenderingContext2D): void {
     this.draw(ctx)
 
-    this.velocity.x *= this.fritcion 
-    this.velocity.y *= this.fritcion 
+    this.velocity.x *= this.fritcion
+    this.velocity.y *= this.fritcion
 
     this.x = this.x + this.velocity.x
     this.y = this.y + this.velocity.y
@@ -109,6 +109,77 @@ class Particle extends CircleWithVelocity {
     ctx.restore()
   }
 }
+
+class Score {
+  total: number
+
+  constructor () {
+    this.total = 0
+  }
+
+  draw (ctx: CanvasRenderingContext2D) {
+    ctx.font = '24px sans-serif'
+    ctx.fillStyle = 'white'
+    ctx.textAlign = 'left'
+    ctx.fillText(`Score: ${this.total}`, 20, 40)
+  }
+
+  public reset () {
+    this.total = 0
+  }
+
+  public increase (value: number) {
+    this.total += value
+  }
+}
+
+const score = new Score()
+
+class Game {
+  constructor () {
+    this.keyDownHandler = this.keyDownHandler.bind(this)
+    this.restart = this.restart.bind(this)
+  }
+
+  private keyDownHandler () {
+    this.restart()
+  }
+
+  addListener () {
+    window.addEventListener('keydown', this.keyDownHandler)
+  }
+
+  removeListener () {
+    window.removeEventListener('keydown', this.keyDownHandler)
+  }
+
+  restart () {
+    projectiles.splice(0, particles.length)
+    enemies.splice(0, enemies.length)
+    particles.splice(0, particles.length)
+
+    score.reset()
+
+    this.removeListener()
+
+    canvas.startAnimation(tick)
+  }
+
+  drawGameOverMessage (ctx: CanvasRenderingContext2D) {
+    ctx.font = '48px sans-serif'
+    ctx.fillStyle = 'white'
+    ctx.textAlign = 'center'
+    ctx.fillText(`Your score is ${score.total}`, xCenter, yCenter - 100)
+    ctx.fillText('Press any key to restart', xCenter, yCenter - 40)
+  }
+
+  gameOver (ctx: CanvasRenderingContext2D) {
+    this.drawGameOverMessage(ctx)
+    this.addListener()
+  }
+}
+
+const game = new Game()
 
 const spawnEnemies = () => {
   setInterval(() => {
@@ -139,7 +210,7 @@ spawnEnemies()
 const player = new Player()
 const projectiles: Projectile[] = []
 const enemies: Enemy[] = []
-const particles: Particle[] = [];
+const particles: Particle[] = []
 
 canvas.element.addEventListener('click', (e: MouseEvent) => {
   const MULTIPLIER = 6
@@ -154,7 +225,7 @@ canvas.element.addEventListener('click', (e: MouseEvent) => {
   }))
 })
 
-const tick = () => {
+function tick () {
   canvas.context.fillStyle = 'rgba(0, 0, 0, 0.1)'
   canvas.context.fillRect(0, 0, canvas.element.width, canvas.element.height)
 
@@ -179,6 +250,7 @@ const tick = () => {
     setTimeout(() => {
       if (dist - enemy.r - player.r < 1) {
         canvas.stopAnimation()
+        game.gameOver(canvas.context)
       }
     }, 0)
 
@@ -187,7 +259,7 @@ const tick = () => {
 
       setTimeout(() => {
         if (dist - enemy.r - projectile.r < 1) {
-          const minEnemyR = 20;
+          const minEnemyR = 20
 
           for (let i = 0; i <= enemy.r * 0.5; i++) {
             particles.push(new Particle(
@@ -197,7 +269,7 @@ const tick = () => {
               enemy.color,
               {
                 x: (Math.random() - 0.5) * 6,
-                y: (Math.random() - 0.5) * 6,
+                y: (Math.random() - 0.5) * 6
               }
             ))
           }
@@ -206,8 +278,10 @@ const tick = () => {
             gsap.to(enemy, {
               r: enemy.r - 10
             })
+            score.increase(1)
           } else {
             enemies.splice(enemyIndex, 1)
+            score.increase(2)
           }
           projectiles.splice(projectileIndex, 1)
         }
@@ -219,9 +293,11 @@ const tick = () => {
     if (particle.alpha <= 0) {
       particles.splice(index, 1)
     } else {
-      particle.update(canvas.context);
+      particle.update(canvas.context)
     }
   })
+
+  score.draw(canvas.context)
 }
 
 canvas.startAnimation(tick)
