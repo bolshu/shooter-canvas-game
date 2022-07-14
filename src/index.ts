@@ -1,6 +1,7 @@
 import gsap from 'gsap'
 import { BaseStyles } from './modules/BaseStyles'
 import { Canvas } from './modules/Canvas'
+import { Score } from './modules/Score'
 
 BaseStyles.apply()
 
@@ -8,14 +9,6 @@ const canvas = new Canvas()
 
 const xCenter = canvas.element.width / 2
 const yCenter = canvas.element.height / 2
-
-class Colors {
-  static white = 'white'
-
-  static getEnemyColor () {
-
-  }
-}
 
 class Circle {
   x: number
@@ -40,12 +33,6 @@ class Circle {
   }
 }
 
-class Player extends Circle {
-  constructor () {
-    super(xCenter, yCenter, 20, Colors.white)
-  }
-}
-
 type Velocity = { x: number; y: number}
 
 class CircleWithVelocity extends Circle {
@@ -62,18 +49,6 @@ class CircleWithVelocity extends Circle {
 
     this.x = this.x + this.velocity.x
     this.y = this.y + this.velocity.y
-  }
-}
-
-class Projectile extends CircleWithVelocity {
-  constructor (velocity: Velocity) {
-    super(xCenter, yCenter, 5, Colors.white, velocity)
-  }
-}
-
-class Enemy extends CircleWithVelocity {
-  constructor (x: number, y: number, r: number, velocity: Velocity) {
-    super(x, y, r, `hsl(${Math.random() * 200}, 50%, 50%)`, velocity)
   }
 }
 
@@ -109,31 +84,6 @@ class Particle extends CircleWithVelocity {
     ctx.restore()
   }
 }
-
-class Score {
-  total: number
-
-  constructor () {
-    this.total = 0
-  }
-
-  draw (ctx: CanvasRenderingContext2D) {
-    ctx.font = '24px sans-serif'
-    ctx.fillStyle = 'white'
-    ctx.textAlign = 'left'
-    ctx.fillText(`Score: ${this.total}`, 20, 40)
-  }
-
-  public reset () {
-    this.total = 0
-  }
-
-  public increase (value: number) {
-    this.total += value
-  }
-}
-
-const score = new Score()
 
 class Game {
   constructor () {
@@ -179,8 +129,6 @@ class Game {
   }
 }
 
-const game = new Game()
-
 const spawnEnemies = () => {
   setInterval(() => {
     const rMin = 20
@@ -201,16 +149,24 @@ const spawnEnemies = () => {
       canvas.element.width / 2 - x
     )
 
-    enemies.push(new Enemy(x, y, r, { x: Math.cos(angle), y: Math.sin(angle) }))
+    enemies.push(new CircleWithVelocity(
+      x,
+      y,
+      r,
+      `hsl(${Math.random() * 200}, 50%, 50%)`,
+      { x: Math.cos(angle), y: Math.sin(angle) }
+    ))
   }, 1000)
 }
 
 spawnEnemies()
 
-const player = new Player()
-const projectiles: Projectile[] = []
-const enemies: Enemy[] = []
+const player = new Circle(xCenter, yCenter, 20, 'white')
+const projectiles: CircleWithVelocity[] = []
+const enemies: CircleWithVelocity[] = []
 const particles: Particle[] = []
+const score = new Score()
+const game = new Game()
 
 canvas.element.addEventListener('click', (e: MouseEvent) => {
   const MULTIPLIER = 6
@@ -219,10 +175,11 @@ canvas.element.addEventListener('click', (e: MouseEvent) => {
     e.clientX - canvas.element.width / 2
   )
 
-  projectiles.push(new Projectile({
-    x: Math.cos(angle) * MULTIPLIER,
-    y: Math.sin(angle) * MULTIPLIER
-  }))
+  projectiles.push(new CircleWithVelocity(
+    xCenter, yCenter, 5, 'white', {
+      x: Math.cos(angle) * MULTIPLIER,
+      y: Math.sin(angle) * MULTIPLIER
+    }))
 })
 
 function tick () {
@@ -252,7 +209,7 @@ function tick () {
         canvas.stopAnimation()
         game.gameOver(canvas.context)
       }
-    }, 0)
+    })
 
     projectiles.forEach((projectile, projectileIndex) => {
       const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
