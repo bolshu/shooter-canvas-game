@@ -1,4 +1,6 @@
-# Project
+# Shooter
+
+Canvas game
 
 ## How to start
 
@@ -18,10 +20,4 @@ To lint and fix codestyle
 
 ```sh
 npm run lint
-```
-
-To test
-
-```sh
-npm run test
 ```
