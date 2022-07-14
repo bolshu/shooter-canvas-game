@@ -21,7 +21,7 @@ class Circle {
   x: number
   y: number
   r: number
-  private readonly color: string
+  readonly color: string
 
   constructor (x: number, y: number, r: number, color: string) {
     this.x = x
@@ -67,7 +67,7 @@ class CircleWithVelocity extends Circle {
 
 class Projectile extends CircleWithVelocity {
   constructor (velocity: Velocity) {
-    super(xCenter, yCenter, 3, Colors.white, velocity)
+    super(xCenter, yCenter, 5, Colors.white, velocity)
   }
 }
 
@@ -77,7 +77,38 @@ class Enemy extends CircleWithVelocity {
   }
 }
 
-const enemies: Enemy[] = []
+class Particle extends CircleWithVelocity {
+  alpha: number;
+  fritcion: number;
+
+  constructor (x: number, y: number, r: number, color: string, velocity: Velocity) {
+    super(x, y, r, color, velocity)
+
+    this.alpha = 1
+    this.fritcion = 0.99
+  }
+
+  update(ctx: CanvasRenderingContext2D): void {
+    this.draw(ctx)
+
+    this.velocity.x *= this.fritcion 
+    this.velocity.y *= this.fritcion 
+
+    this.x = this.x + this.velocity.x
+    this.y = this.y + this.velocity.y
+
+    this.alpha -= 0.01
+  }
+
+  public draw (ctx: CanvasRenderingContext2D) {
+    ctx.save()
+    ctx.globalAlpha = this.alpha
+
+    super.draw(ctx)
+
+    ctx.restore()
+  }
+}
 
 const spawnEnemies = () => {
   setInterval(() => {
@@ -106,8 +137,9 @@ const spawnEnemies = () => {
 spawnEnemies()
 
 const player = new Player()
-
 const projectiles: Projectile[] = []
+const enemies: Enemy[] = []
+const particles: Particle[] = [];
 
 canvas.element.addEventListener('click', (e: MouseEvent) => {
   const MULTIPLIER = 6
@@ -157,6 +189,19 @@ const tick = () => {
         if (dist - enemy.r - projectile.r < 1) {
           const minEnemyR = 20;
 
+          for (let i = 0; i <= enemy.r * 0.5; i++) {
+            particles.push(new Particle(
+              projectile.x,
+              projectile.y,
+              Math.random() * 4,
+              enemy.color,
+              {
+                x: (Math.random() - 0.5) * 6,
+                y: (Math.random() - 0.5) * 6,
+              }
+            ))
+          }
+
           if (enemy.r - minEnemyR > minEnemyR) {
             gsap.to(enemy, {
               r: enemy.r - 10
@@ -168,6 +213,14 @@ const tick = () => {
         }
       })
     })
+  })
+
+  particles.forEach((particle, index) => {
+    if (particle.alpha <= 0) {
+      particles.splice(index, 1)
+    } else {
+      particle.update(canvas.context);
+    }
   })
 }
 
